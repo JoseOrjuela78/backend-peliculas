@@ -8,8 +8,11 @@ const { dbConenection } = require('./database/config');
 
 app.use(cors());
 
+//lectura del body
 
-//Bese de datos
+app.use(express.json());
+
+//Base de datos
 
 dbConenection();
 
@@ -17,17 +20,9 @@ dbConenection();
 
 //mongo user: jaorjuelaa pass: RrjNU3paODYP04AC
 
-app.get('/', (req, res) => {
-
-    res.json({
-        ok: true,
-        msj: 'hello world'
-    });
-
-});
-
+app.use('/api/peliculas', require('./routes/peliculas'));
 
 
 app.listen(process.env.PORT, () => {
     console.log('servidor corriendo en el puerto : ' + process.env.PORT)
-})
+});
