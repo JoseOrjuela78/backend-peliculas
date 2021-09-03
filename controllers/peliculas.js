@@ -1,4 +1,9 @@
+ const pathCompleto = require('path');
  const Pelicula = require('../models/peliculas');
+ const { response } = require('express');
+ const { actualizarImagen } = require('../helpers/actualizarCaratula');
+ const { v4: uuidv4 } = require('uuid');
+
 
  const getPeliculas = async(req, res) => {
 
@@ -9,7 +14,22 @@
          usuarios
      });
 
- }
+ };
+
+ const getBusqueda = async(req, res) => {
+
+     const busqueda = req.params.busqueda;
+     const regex = new RegExp(busqueda, 'i');
+
+     const peliculas = await Pelicula.find({ nombre: regex });
+
+     res.json({
+         ok: true,
+         peliculas
+     });
+
+ };
+
 
  const crearPelicula = async(req, res) => {
 
@@ -93,10 +113,76 @@
  };
 
 
+ const subirCaratula = (req, res = response) => {
+
+     const tipo = req.params.tipo;
+     const id = req.params.id;
+
+     if (!req.files || Object.keys(req.files).length === 0) {
+         return res.status(400).json({
+             ok: false,
+             mjs: "no se anexo ninguna caratula"
+         });
+     }
+
+     const file = req.files.imagen;
+     const nombreCortado = file.name.split('.');
+     const tipoArchivo = nombreCortado[nombreCortado.length - 1];
+     const tiposValidos = ['png', 'jpg', 'jpeg', 'git'];
+
+     if (!tiposValidos.includes(tipoArchivo)) {
+         return res.status(400).json({
+             ok: false,
+             mjs: "no es una extension valida"
+         });
+     }
+     //nombre imagen
+     const nombreIndexado = `${uuidv4()}.${tipoArchivo}`;
+     //path
+
+     const path = `./${tipo}/${nombreIndexado}`;
+
+     file.mv(path, (err) => {
+         if (err) {
+             console.log(err);
+             return res.status(500).json({
+                 ok: false,
+                 msj: 'error al guardar img'
+             });
+         }
+
+         actualizarImagen(id, nombreIndexado);
+
+         res.json({
+             ok: true,
+             msj: 'imagen guardada',
+             nombreIndexado
+         });
+     });
+
+
+
+ };
+
+
+
+ const retornaImgen = (req, res = response) => {
+
+     const img = req.params.imgId;
+
+     const pathImg = pathCompleto.join(__dirname, `../caratulas/${img}`);
+
+     res.sendFile(pathImg);
+ }
+
+
  module.exports = {
      getPeliculas,
      crearPelicula,
      actualizarPelicula,
-     borrarPelicula
+     borrarPelicula,
+     getBusqueda,
+     subirCaratula,
+     retornaImgen
 
  };
