@@ -16,12 +16,14 @@ app.use(express.json());
 
 dbConenection();
 
-// rutas
+// Directorio público
+app.use(express.static('public'));
 
-//mongo user: jaorjuelaa pass: RrjNU3paODYP04AC
+// rutas
 
 app.use('/api/peliculas', require('./routes/peliculas'));
 
+//servidors
 
 app.listen(process.env.PORT, () => {
     console.log('servidor corriendo en el puerto : ' + process.env.PORT)

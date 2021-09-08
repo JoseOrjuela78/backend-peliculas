@@ -1,4 +1,5 @@
  const pathCompleto = require('path');
+ const fs = require('fs');
  const Pelicula = require('../models/peliculas');
  const { response } = require('express');
  const { actualizarImagen } = require('../helpers/actualizarCaratula');
@@ -7,11 +8,24 @@
 
  const getPeliculas = async(req, res) => {
 
-     const usuarios = await Pelicula.find();
+     const peliculas = await Pelicula.find();
 
      res.json({
          ok: true,
-         usuarios
+         peliculas
+     });
+
+ };
+
+ const getIdPeliculas = async(req, res) => {
+
+     const iud = req.params.id;
+
+     const pelicula = await Pelicula.findById(iud);
+
+     res.json({
+         ok: true,
+         pelicula
      });
 
  };
@@ -19,6 +33,7 @@
  const getBusqueda = async(req, res) => {
 
      const busqueda = req.params.busqueda;
+
      const regex = new RegExp(busqueda, 'i');
 
      const peliculas = await Pelicula.find({ nombre: regex });
@@ -61,6 +76,7 @@
          }
 
          const campos = req.body;
+
          delete campos._id;
 
          const peliculaActualizada = await Pelicula.findByIdAndUpdate(iud, campos, { new: true });
@@ -172,12 +188,19 @@
 
      const pathImg = pathCompleto.join(__dirname, `../caratulas/${img}`);
 
-     res.sendFile(pathImg);
- }
+     if (fs.existsSync(pathImg)) {
+         res.sendFile(pathImg);
+     } else {
+         const pathImg = pathCompleto.join(__dirname, `../caratulas/no-img.png`);
+         res.sendFile(pathImg);
+     }
+
+ };
 
 
  module.exports = {
      getPeliculas,
+     getIdPeliculas,
      crearPelicula,
      actualizarPelicula,
      borrarPelicula,
