@@ -22,6 +22,8 @@ app.use(express.static('public'));
 // rutas
 
 app.use('/api/peliculas', require('./routes/peliculas'));
+app.use('/usuarios', require('./routes/usuarios'));
+app.use('/auth', require('./routes/auth'));
 
 //servidors
 
